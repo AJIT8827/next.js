@@ -434,17 +434,6 @@ function NonIndex({ ctx }: { ctx: AppRenderContext }) {
   return null
 }
 
-function getServeStreamingMetadata(ctx: AppRenderContext) {
-  const isRoutePPREnabled = !!ctx.renderOpts.experimental.isRoutePPREnabled
-  const serveStreamingMetadata = !!ctx.renderOpts.serveStreamingMetadata
-  // If the route is in PPR and the special env is not set, disable the streaming metadata.
-  // TODO: enable streaming metadata in PPR mode by default once it's ready.
-  if (isRoutePPREnabled && process.env.__NEXT_EXPERIMENTAL_PPR !== 'true') {
-    return false
-  }
-  return serveStreamingMetadata
-}
-
 /**
  * This is used by server actions & client-side navigations to generate RSC data from a client-side request.
  * This function is only called on "dynamic" requests (ie, there wasn't already a static response).
@@ -484,7 +473,7 @@ async function generateDynamicRSCPayload(
     url,
   } = ctx
 
-  const serveStreamingMetadata = getServeStreamingMetadata(ctx)
+  const serveStreamingMetadata = !!ctx.renderOpts.serveStreamingMetadata
 
   if (!options?.skipFlight) {
     const preloadCallbacks: PreloadCallbacks = []
@@ -798,7 +787,7 @@ async function getRSCPayload(
     getDynamicParamFromSegment,
     query
   )
-  const serveStreamingMetadata = getServeStreamingMetadata(ctx)
+  const serveStreamingMetadata = !!ctx.renderOpts.serveStreamingMetadata
 
   const searchParams = createServerSearchParamsForMetadata(query, workStore)
   const { ViewportTree, MetadataTree, getViewportReady, getMetadataReady } =
@@ -930,7 +919,7 @@ async function getErrorRSCPayload(
     workStore,
   } = ctx
 
-  const serveStreamingMetadata = getServeStreamingMetadata(ctx)
+  const serveStreamingMetadata = !!ctx.renderOpts.serveStreamingMetadata
   const searchParams = createServerSearchParamsForMetadata(query, workStore)
   const { MetadataTree, ViewportTree } = createMetadataComponents({
     tree,
