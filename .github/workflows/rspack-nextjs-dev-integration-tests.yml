@@ -82,6 +82,9 @@ jobs:
           -c $TEST_CONCURRENCY \
           --type development
       stepName: 'test-rspack-dev-${{ matrix.group }}'
+      # Same reason as why we use more groups: Failing tests tend to hang for a
+      # long time before failing. Default is 30 minutes.
+      timeout_minutes: 60
     secrets: inherit
 
   test-integration-development:
@@ -103,6 +106,7 @@ jobs:
           -c $TEST_CONCURRENCY \
           --type integration
       stepName: 'test-rspack-dev-integration-${{ matrix.group }}'
+      timeout_minutes: 60
     secrets: inherit
 
   # Collect integration test results from execute_tests,
