@@ -40,7 +40,7 @@ jobs:
     steps:
       - run: echo "Exposing env vars"
 
-  # First, build next-dev and Next.js both to execute across tests.
+  # First, build Next.js to execute across tests.
   build-next:
     name: build-next
     uses: ./.github/workflows/build_reusable.yml
@@ -77,7 +77,6 @@ jobs:
       afterBuildEnvJson: ${{ needs.env-vars.outputs.envJson }}
       afterBuild: |
         NEXT_TEST_MODE=dev node run-tests.js \
-          --test-pattern '^(test\/(development|e2e))/.*\.test\.(js|jsx|ts|tsx)$' \
           -g ${{ matrix.group }}/16 \
           -c $TEST_CONCURRENCY \
           --type development
@@ -100,8 +99,10 @@ jobs:
     with:
       nodeVersion: 18.18.2
       afterBuildEnvJson: ${{ needs.env-vars.outputs.envJson }}
+      # HACK: TURBOPACK_DEV here isn't accurate, but it's used to disable a
+      # large number of non-dev tests.
       afterBuild: |
-        node run-tests.js \
+        TURBOPACK_DEV=1 node run-tests.js \
           -g ${{ matrix.group }}/16 \
           -c $TEST_CONCURRENCY \
           --type integration
