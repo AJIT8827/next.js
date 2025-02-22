@@ -51,7 +51,7 @@ import {
   MODERN_BROWSERSLIST_TARGET,
   UNDERSCORE_NOT_FOUND_ROUTE,
 } from '../shared/lib/constants'
-import prettyBytes from './output/pretty-bytes'
+import prettyBytes from '../lib/pretty-bytes'
 import { isDynamicRoute } from '../shared/lib/router/utils/is-dynamic'
 import { findPageFile } from '../server/lib/find-page-file'
 import { isEdgeRuntime } from '../lib/is-edge-runtime'
@@ -404,9 +404,15 @@ export async function printTreeView(
     gzipSize?: boolean
   }
 ) {
-  const getPrettySize = (_size: number): string => {
-    const size = prettyBytes(_size)
-    return white(bold(size))
+  const getPrettySize = (
+    _size: number,
+    { strong }: { strong?: boolean } = {}
+  ): string => {
+    const size = process.env.__NEXT_PRIVATE_DETERMINISTIC_BUILD_OUTPUT
+      ? '42 kB' // Use a fake fixed size to enforce deterministic build output.
+      : prettyBytes(_size)
+
+    return strong ? white(bold(size)) : size
   }
 
   // Can be overridden for test purposes to omit the build duration output.
@@ -534,14 +540,14 @@ export async function printTreeView(
           ? ampFirst
             ? cyan('AMP')
             : pageInfo.size >= 0
-              ? prettyBytes(pageInfo.size)
+              ? getPrettySize(pageInfo.size)
               : ''
           : '',
         pageInfo
           ? ampFirst
             ? cyan('AMP')
             : pageInfo.size >= 0
-              ? getPrettySize(pageInfo.totalSize)
+              ? getPrettySize(pageInfo.totalSize, { strong: true })
               : ''
           : '',
       ])
@@ -561,7 +567,7 @@ export async function printTreeView(
           const size = stats.sizes.get(file)
           messages.push([
             `${contSymbol}   ${innerSymbol} ${getCleanName(file)}`,
-            typeof size === 'number' ? prettyBytes(size) : '',
+            typeof size === 'number' ? getPrettySize(size) : '',
             '',
           ])
         })
@@ -643,7 +649,9 @@ export async function printTreeView(
 
     messages.push([
       '+ First Load JS shared by all',
-      typeof sharedFilesSize === 'number' ? getPrettySize(sharedFilesSize) : '',
+      typeof sharedFilesSize === 'number'
+        ? getPrettySize(sharedFilesSize, { strong: true })
+        : '',
       '',
     ])
     const sharedCssFiles: string[] = []
@@ -678,13 +686,13 @@ export async function printTreeView(
         return
       }
 
-      messages.push([`  ${innerSymbol} ${cleanName}`, prettyBytes(size), ''])
+      messages.push([`  ${innerSymbol} ${cleanName}`, getPrettySize(size), ''])
     })
 
     if (restChunkCount > 0) {
       messages.push([
         `  └ other shared chunks (total)`,
-        prettyBytes(restChunkSize),
+        getPrettySize(restChunkSize),
         '',
       ])
     }
@@ -728,7 +736,11 @@ export async function printTreeView(
     )
 
     messages.push(['', '', ''])
-    messages.push(['ƒ Middleware', getPrettySize(sum(middlewareSizes)), ''])
+    messages.push([
+      'ƒ Middleware',
+      getPrettySize(sum(middlewareSizes), { strong: true }),
+      '',
+    ])
   }
 
   print(
