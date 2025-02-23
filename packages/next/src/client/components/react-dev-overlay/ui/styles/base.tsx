@@ -73,13 +73,13 @@ export function Base() {
           --timing-overlay: cubic-bezier(0.175, 0.885, 0.32, 1.1);
 
           --rounded-none: 0px;
-          --rounded-sm: 0.125rem; /* 2px */
-          --rounded-md: 0.25rem; /* 4px */
-          --rounded-md-2: 0.375rem; /* 6px */
-          --rounded-lg: 0.5rem; /* 8px */
-          --rounded-xl: 0.75rem; /* 12px */
-          --rounded-2xl: 1rem; /* 16px */
-          --rounded-3xl: 1.5rem; /* 24px */
+          --rounded-sm: 2px;
+          --rounded-md: 4px;
+          --rounded-md-2: 6px;
+          --rounded-lg: 8px;
+          --rounded-xl: 12px;
+          --rounded-2xl: 16px;
+          --rounded-3xl: 24px;
           --rounded-full: 9999px;
 
           /* --rem-px-N: rem value of Npx in base font size 16px. */
